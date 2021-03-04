@@ -18,7 +18,7 @@ def generate_choices(file_datas: [FileData]):
         for file_data
         in file_datas
     ] + [
-        Command.NEXT.parametrized(file_data.filename)
+        Command.BACK.parametrized(file_data.filename)
         for file_data
         in file_datas
     ] + [
@@ -36,25 +36,18 @@ def print_lines(raw_command: str, file_datas: [FileData]):
 
     (command, args) = Command.decompose(raw_command)
 
-    if command is None or command == Command.EXIT:
+    if command is None:
         return
+    elif command == Command.EXIT:
+        exit()
     else:
-        if command == Command.NEXT:
-            for file_data in file_datas:
-                line = ""
-                if condition(file_data.filename, args):
-                    line = file_data.next_line()
-                else:
-                    line = file_data.current_line()
-                print_wrapped(line)
-        elif command == Command.BACK:
-            for file_data in file_datas:
-                line = ""
-                if condition(file_data.filename, args):
-                    line = file_data.back_line()
-                else:
-                    line = file_data.current_line()
-                print_wrapped(line)
+        for file_data in file_datas:
+            line = ""
+            if condition(file_data.filename, args):
+                line = file_data.get_line(command)
+            else:
+                line = file_data.get_line(Command.CURRENT)
+            print_wrapped(line)
 
 
 if __name__ == "__main__":
@@ -69,9 +62,7 @@ if __name__ == "__main__":
 
     # main loop
     clear()
-    for file_data in file_datas:
-        line = file_data.current_line()
-        print_wrapped(line)
+    print_lines(Command.CURRENT.name, file_datas)
 
     while True:
         status = [
@@ -85,8 +76,5 @@ if __name__ == "__main__":
         answer = inquirer.prompt(status)['action']
 
         clear()
-
-        if answer == Command.EXIT.name:
-            exit()
 
         print_lines(answer, file_datas)

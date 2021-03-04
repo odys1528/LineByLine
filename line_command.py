@@ -1,10 +1,11 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class Command(Enum):
-    NEXT = auto()
-    BACK = auto()
-    EXIT = auto()
+    CURRENT = 0
+    NEXT = 1
+    BACK = -1
+    EXIT = 42
 
     def parametrized(self, filename: str):
         return self.name + " " + filename
@@ -39,21 +40,19 @@ class FileData:
         if self.__content == []:
             self.content = [""]
 
-    def current_line(self):
-        return self.__change_line(0)
+    def get_line(self, command: Command):
+        if command == Command.EXIT:
+            return None
+        else:
+            return self.__get_line(command.value)
 
-    def next_line(self):
-        return self.__change_line(1)
-
-    def back_line(self):
-        return self.__change_line(-1)
-
-    def __change_line(self, diff: int):
-        try:
-            line = self.__content[self.__current_index + diff]
-            self.__current_index = self.__current_index + diff
+    def __get_line(self, diff: int):
+        index = self.__current_index + diff
+        if -len(self.__content) <= index < len(self.__content):
+            line = self.__content[index]
+            self.__current_index = index
             return line
-        except IndexError:
+        else:
             self.__current_index = 0
             return self.__content[self.__current_index]
 
